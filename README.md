@@ -1,6 +1,6 @@
 # Telegram Mini App - Контент для подписчиков
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&env=DATABASE_URL,TELEGRAM_BOT_TOKEN,TRIBUTE_API_BASE,TRIBUTE_API_KEY,TRIBUTE_CHANNEL_ID,TILDA_UPSELL_URL,NOTION_TOKEN,NOTION_DATABASE_ID,JWT_SECRET,REDIS_URL&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
 [![Vercel Status](https://vercel.com/button)](https://vercel.com/azatvadjipov/telegram-mini-app)
 
 [![GitHub stars](https://img.shields.io/github/stars/azatvadjipov/telegram-mini-app?style=social)](https://github.com/azatvadjipov/telegram-mini-app)
@@ -15,13 +15,15 @@
 ## ⚡ Быстрое развертывание
 
 ### Один клик для деплоя
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&env=DATABASE_URL,TELEGRAM_BOT_TOKEN,TRIBUTE_API_BASE,TRIBUTE_API_KEY,TRIBUTE_CHANNEL_ID,TILDA_UPSELL_URL,NOTION_TOKEN,NOTION_DATABASE_ID,JWT_SECRET,REDIS_URL&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
 
 **Что получите после нажатия:**
 - ✅ Автоматическая настройка проекта на Vercel
-- ✅ Предварительно настроенные переменные окружения
 - ✅ Production-ready конфигурация
 - ✅ Автоматические деплои при пуше в main ветку
+- ✅ Ссылка на инструкции по настройке переменных окружения
+
+**⚠️ Важно:** После импорта проекта настройте переменные окружения в Vercel Dashboard, следуя инструкциям по ссылке.
 
 ### Ручная настройка
 Если предпочитаете настроить вручную, следуйте инструкциям в [`VERCEL_SETUP.md`](VERCEL_SETUP.md).

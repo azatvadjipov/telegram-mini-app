@@ -12,18 +12,5 @@
   "env": {
     "NODE_ENV": "production"
   },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "TELEGRAM_BOT_TOKEN": "@telegram_bot_token",
-      "TRIBUTE_API_BASE": "@tribute_api_base",
-      "TRIBUTE_API_KEY": "@tribute_api_key",
-      "TRIBUTE_CHANNEL_ID": "@tribute_channel_id",
-      "TILDA_UPSELL_URL": "@tilda_upsell_url",
-      "NOTION_TOKEN": "@notion_token",
-      "NOTION_DATABASE_ID": "@notion_database_id",
-      "JWT_SECRET": "@jwt_secret",
-      "REDIS_URL": "@redis_url"
-    }
-  }
+
 }
