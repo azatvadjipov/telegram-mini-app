@@ -1,6 +1,32 @@
 # Telegram Mini App - Контент для подписчиков
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&env=DATABASE_URL,TELEGRAM_BOT_TOKEN,TRIBUTE_API_BASE,TRIBUTE_API_KEY,TRIBUTE_CHANNEL_ID,TILDA_UPSELL_URL,NOTION_TOKEN,NOTION_DATABASE_ID,JWT_SECRET,REDIS_URL&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
+[![Vercel Status](https://vercel.com/button)](https://vercel.com/azatvadjipov/telegram-mini-app)
+
+[![GitHub stars](https://img.shields.io/github/stars/azatvadjipov/telegram-mini-app?style=social)](https://github.com/azatvadjipov/telegram-mini-app)
+[![GitHub license](https://img.shields.io/github/license/azatvadjipov/telegram-mini-app)](https://github.com/azatvadjipov/telegram-mini-app/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+
 Полнофункциональное Telegram Mini App с gated контентом для подписчиков, использующее Tribute для управления платежами и Notion для управления контентом.
+
+🚀 **Быстрое развертывание:** Нажмите кнопку выше для автоматического деплоя на Vercel с преднастройкой переменных окружения!
+
+## ⚡ Быстрое развертывание
+
+### Один клик для деплоя
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/azatvadjipov/telegram-mini-app&env=DATABASE_URL,TELEGRAM_BOT_TOKEN,TRIBUTE_API_BASE,TRIBUTE_API_KEY,TRIBUTE_CHANNEL_ID,TILDA_UPSELL_URL,NOTION_TOKEN,NOTION_DATABASE_ID,JWT_SECRET,REDIS_URL&envDescription=Configure%20environment%20variables%20for%20Telegram%20Mini%20App&envLink=https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
+
+**Что получите после нажатия:**
+- ✅ Автоматическая настройка проекта на Vercel
+- ✅ Предварительно настроенные переменные окружения
+- ✅ Production-ready конфигурация
+- ✅ Автоматические деплои при пуше в main ветку
+
+### Ручная настройка
+Если предпочитаете настроить вручную, следуйте инструкциям в [`VERCEL_SETUP.md`](VERCEL_SETUP.md).
+
+---
 
 ## 🚀 Возможности
 
