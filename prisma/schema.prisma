@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Page {
+  id        String     @id @default(cuid())
+  parentId  String?    @db.VarChar(191)
+  slug      String     @unique
+  title     String
+  excerpt   String?
+  contentMd String     @db.Text
+  status    PageStatus @default(published)
+  access    PageAccess @default(premium)
+  sort      Int        @default(0)
+  updatedAt DateTime   @updatedAt
+
+  @@index([parentId])
+  @@index([status])
+  @@index([access])
+  @@index([title])
+  @@index([status, access])
+}
+
+enum PageStatus {
+  draft
+  published
+}
+
+enum PageAccess {
+  public
+  premium
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model UserAccess {
+  telegramUserId String   @id
+  isActive       Boolean  @default(false)
+  updatedAt      DateTime @updatedAt
+}
