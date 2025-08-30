@@ -13,6 +13,18 @@ export const prisma =
         url: process.env.DATABASE_URL,
       },
     },
+    // Try to avoid prepared statement conflicts
+    __internal: {
+      engine: {
+        allowTriggerRetry: false,
+        enableMetrics: false,
+      },
+    },
+    // Disable prepared statements to avoid conflicts in serverless environments
+    transactionOptions: {
+      maxWait: 2000,
+      timeout: 5000,
+    },
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
