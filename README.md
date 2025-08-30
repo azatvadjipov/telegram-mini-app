@@ -27,9 +27,29 @@
 
 **После импорта проекта настройте переменные окружения в Vercel Dashboard:**
 
-1. Перейдите в **Settings** → **Environment Variables**
-2. Добавьте все переменные из [`env.production.example`](https://github.com/azatvadjipov/telegram-mini-app/blob/main/env.production.example)
-3. **Перезапустите сборку** после добавления переменных
+### Шаг 1: Откройте настройки проекта
+1. В [Vercel Dashboard](https://vercel.com/dashboard) выберите ваш проект
+2. Перейдите в **Settings** → **Environment Variables**
+
+### Шаг 2: Добавьте переменные окружения
+Нажмите **"Add New"** и добавьте следующие переменные:
+
+| Переменная | Значение |
+|------------|----------|
+| `DATABASE_URL` | `postgresql://user:pass@host:5432/db` |
+| `TELEGRAM_BOT_TOKEN` | `ваш_токен_от_BotFather` |
+| `TRIBUTE_API_BASE` | `https://api.tribute.com` |
+| `TRIBUTE_API_KEY` | `ваш_tribute_api_key` |
+| `TRIBUTE_CHANNEL_ID` | `ваш_channel_id` |
+| `TILDA_UPSELL_URL` | `https://ваш-сайт.tilda.ws` |
+| `NOTION_TOKEN` | `secret_ваш_notion_token` |
+| `NOTION_DATABASE_ID` | `ваш_database_id` |
+| `JWT_SECRET` | `сгенерируйте_с_помощью_node_generate-jwt-secret.js` |
+
+### Шаг 3: Перезапустите сборку
+1. После добавления всех переменных нажмите **"Save"**
+2. Перейдите в **Deployments** и нажмите **"Redeploy"** на последней сборке
+3. Подождите завершения новой сборки
 
 **Без переменных окружения сборка будет падать с ошибкой:**
 ```
@@ -37,6 +57,19 @@ ZodError: Expected string, received undefined
 ```
 
 Подробные инструкции: [`VERCEL_SETUP.md`](VERCEL_SETUP.md)
+
+### Тестирование сборки локально
+Для тестирования сборки без настройки всех сервисов:
+
+```bash
+# Установите тестовые переменные окружения
+node test-build.js
+
+# Запустите сборку
+npm run build
+```
+
+Это позволит протестировать что код компилируется правильно.
 
 ### Ручная настройка
 Если предпочитаете настроить вручную, следуйте инструкциям в [`VERCEL_SETUP.md`](VERCEL_SETUP.md).
