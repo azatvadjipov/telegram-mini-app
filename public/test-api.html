@@ -61,6 +61,7 @@
 
             <button onclick="testPublicContentTree()">📄 Публичное дерево контента</button>
             <button onclick="testDatabaseConnection()">🗄️ Подключение к БД</button>
+            <button onclick="testEnvironmentVariables()">🔍 Переменные окружения</button>
             <button onclick="testHealthCheck()">❤️ Health Check</button>
 
             <div id="public-results"></div>
@@ -137,6 +138,11 @@
             displayResult('results', result, '🗄️ Подключение к базе данных');
         }
 
+        async function testEnvironmentVariables() {
+            const result = await makeRequest('/api/test-database');
+            displayResult('results', result, '🔍 Переменные окружения');
+        }
+
         async function testHealthCheck() {
             const result = await makeRequest('/api/health');
             displayResult('results', result, '❤️ Health Check');
@@ -184,10 +190,15 @@
         window.onload = async function() {
             console.log('🚀 Starting API tests...');
 
-            // Test basic connectivity
-            await testHealthCheck();
+            // Test environment variables first
+            await testEnvironmentVariables();
 
             // Small delay
+            setTimeout(async () => {
+                await testHealthCheck();
+            }, 500);
+
+            // Another delay
             setTimeout(async () => {
                 await testDatabaseConnection();
             }, 1000);
