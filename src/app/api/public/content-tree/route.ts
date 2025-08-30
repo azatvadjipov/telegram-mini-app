@@ -1,38 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
-import { verifyJWT } from '@/lib/jwt'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Check authorization
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Требуется авторизация' },
-        { status: 401 }
-      )
-    }
+    console.log('🌐 Public content tree request')
 
-    const token = authHeader.substring(7)
-    const payload = await verifyJWT(token)
-
-    if (!payload?.isSubscribed) {
-      return NextResponse.json(
-        { error: 'Требуется активная подписка' },
-        { status: 403 }
-      )
-    }
-
-    // Check cache
-    const cacheKey = 'content:tree'
+    // Check cache first
+    const cacheKey = 'public:content:tree'
     let contentTree = await cache.get(cacheKey)
 
     if (!contentTree) {
-      // Fetch from database
+      console.log('📡 Fetching from database...')
+
+      // Fetch only public pages from database
       const pages = await prisma.page.findMany({
         where: {
           status: 'published',
+          access: 'public',
         },
         select: {
           id: true,
@@ -49,29 +34,37 @@ export async function GET(request: NextRequest) {
         ],
       })
 
+      console.log(`📄 Found ${pages.length} public pages`)
+
       // Build hierarchical tree
       contentTree = buildContentTree(pages)
 
       // Cache for 60 seconds
       await cache.set(cacheKey, contentTree, 60)
+      console.log('💾 Cached content tree')
+    } else {
+      console.log('✅ Using cached content tree')
     }
 
-    return NextResponse.json({ tree: contentTree })
+    return NextResponse.json({
+      tree: contentTree,
+      cached: true,
+      timestamp: new Date().toISOString()
+    })
 
   } catch (error) {
-    console.error('Content tree fetch error:', error)
+    console.error('❌ Public content tree error:', error)
 
-    // More detailed error logging
     if (error instanceof Error) {
       console.error('Error name:', error.name)
       console.error('Error message:', error.message)
-      console.error('Error stack:', error.stack)
     }
 
     return NextResponse.json(
       {
         error: 'Ошибка сервера',
-        details: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined
+        details: process.env.NODE_ENV === 'development' ? error instanceof Error ? error.message : 'Unknown error' : undefined,
+        timestamp: new Date().toISOString()
       },
       { status: 500 }
     )
