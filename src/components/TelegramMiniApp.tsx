@@ -29,13 +29,32 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
 
   useEffect(() => {
     if (!isTelegram) {
-      // For development/testing outside Telegram
-      setAuthStatus('authenticated')
-      setAuthData({
-        subscribed: true,
-        sessionJWT: 'dev-token',
-        user: { id: 123456789, first_name: 'Test', username: 'testuser' }
-      })
+      // For development/testing outside Telegram - generate real JWT
+      const generateDevToken = async () => {
+        try {
+          const response = await fetch('/api/debug/auth', {
+            method: 'GET',
+          })
+          const data = await response.json()
+
+          if (response.ok && data.token) {
+            setAuthData({
+              subscribed: true,
+              sessionJWT: data.token,
+              user: { id: 123456789, first_name: 'Test', username: 'testuser' }
+            })
+            setAuthStatus('authenticated')
+          } else {
+            throw new Error('Failed to generate dev token')
+          }
+        } catch (error) {
+          console.error('Dev token generation failed:', error)
+          setAuthStatus('error')
+          setError('Не удалось сгенерировать токен разработчика')
+        }
+      }
+
+      generateDevToken()
       return
     }
 
