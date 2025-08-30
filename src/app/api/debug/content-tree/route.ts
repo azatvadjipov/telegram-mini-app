@@ -1,22 +1,20 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageStatus } from '@/lib/prisma'
 
 export async function GET() {
   try {
     console.log('🔍 Debug: Testing database connection...')
 
-    // Test database connection
-    const testCount = await prisma.page.count()
-    console.log('✅ Database connection successful: Found', testCount, 'pages')
-
-    // Test page count
-    const pageCount = await prisma.page.count()
-    console.log('📄 Total pages in database:', pageCount)
+    // Test database connection - use findFirst instead of count
+    const testPage = await prisma.page.findFirst({
+      select: { id: true }
+    })
+    console.log('✅ Database connection successful:', testPage ? 'Found pages' : 'No pages found')
 
     // Fetch pages without auth
     const pages = await prisma.page.findMany({
       where: {
-        status: 'published',
+        status: PageStatus.published,
       },
       select: {
         id: true,
@@ -33,7 +31,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       databaseConnected: true,
-      pageCount,
+      pageCount: pages.length,
       samplePages: pages,
       timestamp: new Date().toISOString()
     })
