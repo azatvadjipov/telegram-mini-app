@@ -10,19 +10,36 @@ export default function Home() {
   useEffect(() => {
     // Check if we're in Telegram WebApp
     const checkTelegramWebApp = () => {
+      console.log('🔍 Checking Telegram WebApp environment...')
+
       const urlParams = new URLSearchParams(window.location.hash.substring(1))
       const tgWebAppData = urlParams.get('tgWebAppData')
 
+      console.log('📋 URL params:', Object.fromEntries(urlParams.entries()))
+      console.log('🎯 tgWebAppData from URL:', tgWebAppData)
+
       if (tgWebAppData) {
+        console.log('✅ Using tgWebAppData from URL hash')
         setIsTelegram(true)
         setInitData(decodeURIComponent(tgWebAppData))
       } else if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
         // Fallback for direct Telegram WebApp access
         const webApp = (window as any).Telegram.WebApp
+        console.log('🔄 Telegram WebApp found:', { initData: webApp.initData, platform: webApp.platform })
+
         if (webApp.initData) {
+          console.log('✅ Using initData from Telegram WebApp')
           setIsTelegram(true)
           setInitData(webApp.initData)
+        } else {
+          console.log('⚠️ Telegram WebApp found but no initData')
+          setIsTelegram(false)
+          setInitData(null)
         }
+      } else {
+        console.log('❌ No Telegram WebApp detected, using dev mode')
+        setIsTelegram(false)
+        setInitData(null)
       }
     }
 

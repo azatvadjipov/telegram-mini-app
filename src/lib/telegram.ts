@@ -17,26 +17,54 @@ export interface TelegramInitData {
 }
 
 export function parseInitData(initData: string): TelegramInitData {
-  const params = new URLSearchParams(initData)
-  const data: Record<string, string> = {}
+  console.log('🔍 Parsing initData string...')
 
-  for (const [key, value] of params.entries()) {
-    data[key] = value
-  }
+  try {
+    const params = new URLSearchParams(initData)
+    const data: Record<string, string> = {}
 
-  const user = data.user ? JSON.parse(data.user) : undefined
+    console.log('📋 URLSearchParams created successfully')
 
-  return {
-    query_id: data.query_id,
-    user,
-    auth_date: parseInt(data.auth_date),
-    hash: data.hash,
+    for (const [key, value] of params.entries()) {
+      data[key] = value
+      console.log(`🔑 Parsed param: ${key} = ${value?.substring(0, 50)}...`)
+    }
+
+    console.log('📊 All parsed params:', Object.keys(data))
+
+    const user = data.user ? JSON.parse(data.user) : undefined
+    console.log('👤 User parsed:', user ? { id: user.id, first_name: user.first_name } : 'null')
+
+    const result = {
+      query_id: data.query_id,
+      user,
+      auth_date: parseInt(data.auth_date),
+      hash: data.hash,
+    }
+
+    console.log('✅ parseInitData completed successfully')
+    return result
+
+  } catch (error) {
+    console.error('❌ Error in parseInitData:', error)
+    console.error('❌ Raw initData that caused error:', initData)
+    throw error
   }
 }
 
 export function validateInitData(initData: string): { isValid: boolean; user?: TelegramUser } {
   try {
+    console.log('🔐 Validating Telegram initData...')
+    console.log('📝 Raw initData length:', initData?.length || 0)
+    console.log('📝 Raw initData preview:', initData?.substring(0, 200) + '...')
+
     const parsed = parseInitData(initData)
+    console.log('✅ Parsed initData:', {
+      hasUser: !!parsed.user,
+      authDate: parsed.auth_date,
+      hasHash: !!parsed.hash,
+      hasQueryId: !!parsed.query_id
+    })
 
     // Check if data is not too old (24 hours)
     const now = Math.floor(Date.now() / 1000)

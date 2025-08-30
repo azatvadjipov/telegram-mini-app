@@ -28,14 +28,19 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    console.log('🚀 TelegramMiniApp useEffect triggered:', { isTelegram, initData: initData ? 'present' : 'null' })
+
     if (!isTelegram) {
+      console.log('🛠️ Using development mode - generating JWT token')
       // For development/testing outside Telegram - generate real JWT
       const generateDevToken = async () => {
         try {
+          console.log('📡 Fetching dev JWT token from /api/debug/auth...')
           const response = await fetch('/api/debug/auth', {
             method: 'GET',
           })
           const data = await response.json()
+          console.log('📨 Debug auth response:', { status: response.status, ok: response.ok, hasToken: !!data.token })
 
           if (response.ok && data.token) {
             setAuthData({
@@ -44,11 +49,12 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
               user: { id: 123456789, first_name: 'Test', username: 'testuser' }
             })
             setAuthStatus('authenticated')
+            console.log('✅ Dev authentication successful')
           } else {
             throw new Error('Failed to generate dev token')
           }
         } catch (error) {
-          console.error('Dev token generation failed:', error)
+          console.error('❌ Dev token generation failed:', error)
           setAuthStatus('error')
           setError('Не удалось сгенерировать токен разработчика')
         }
@@ -58,6 +64,8 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
       return
     }
 
+    console.log('📱 Using Telegram mode - validating initData')
+
     if (!initData) {
       setAuthStatus('error')
       setError(messages.auth.invalidData)
@@ -66,6 +74,10 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
 
     const authenticate = async () => {
       try {
+        console.log('📡 Sending Telegram authentication request...')
+        console.log('🔑 initData length:', initData?.length || 0)
+        console.log('🔑 initData preview:', initData?.substring(0, 100) + '...')
+
         const response = await fetch('/api/auth/telegram-verify', {
           method: 'POST',
           headers: {
@@ -75,6 +87,7 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
         })
 
         const data: AuthResponse = await response.json()
+        console.log('📨 Telegram auth response:', { status: response.status, ok: response.ok, error: (data as any).error })
 
         if (!response.ok) {
           throw new Error((data as any).error || messages.auth.error)
@@ -82,8 +95,9 @@ export function TelegramMiniApp({ initData, isTelegram }: TelegramMiniAppProps) 
 
         setAuthData(data)
         setAuthStatus(data.subscribed ? 'authenticated' : 'unauthenticated')
+        console.log('✅ Telegram authentication successful:', { subscribed: data.subscribed })
       } catch (err) {
-        console.error('Authentication error:', err)
+        console.error('❌ Authentication error:', err)
         setAuthStatus('error')
         setError(err instanceof Error ? err.message : messages.errors.unknownError)
       }
