@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = 'content:tree'
     console.log('💾 Checking cache for key:', cacheKey)
 
-    let contentTree: any[] = await cache.get(cacheKey)
+    let contentTree: any[] | null = await cache.get(cacheKey)
     console.log('💾 Cache result:', contentTree ? 'HIT' : 'MISS')
 
     if (!contentTree) {
