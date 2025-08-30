@@ -5,9 +5,14 @@ import { verifyJWT } from '@/lib/jwt'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🌳 Content tree request started')
+
     // Check authorization
     const authHeader = request.headers.get('authorization')
+    console.log('🔑 Auth header present:', !!authHeader)
+
     if (!authHeader?.startsWith('Bearer ')) {
+      console.log('❌ No Bearer token in auth header')
       return NextResponse.json(
         { error: 'Требуется авторизация' },
         { status: 401 }
@@ -15,21 +20,32 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.substring(7)
+    console.log('🔑 Token extracted, verifying JWT...')
+
     const payload = await verifyJWT(token)
+    console.log('🔑 JWT payload:', { isSubscribed: payload?.isSubscribed, telegramUserId: payload?.telegramUserId })
 
     if (!payload?.isSubscribed) {
+      console.log('❌ User not subscribed')
       return NextResponse.json(
         { error: 'Требуется активная подписка' },
         { status: 403 }
       )
     }
 
+    console.log('✅ Authorization passed')
+
     // Check cache
     const cacheKey = 'content:tree'
+    console.log('💾 Checking cache for key:', cacheKey)
+
     let contentTree = await cache.get(cacheKey)
+    console.log('💾 Cache result:', contentTree ? 'HIT' : 'MISS')
 
     if (!contentTree) {
+      console.log('📡 Cache miss, fetching from database...')
       try {
+        console.log('🗄️ Executing raw SQL query...')
         // Fetch from database using raw SQL to avoid prepared statement issues
         const pages = await prisma.$queryRaw`
           SELECT id, "parentId", slug, title, excerpt, access, sort
@@ -38,13 +54,19 @@ export async function GET(request: NextRequest) {
           ORDER BY sort ASC, title ASC
         ` as any[]
 
+        console.log('🗄️ Raw SQL query completed, found', pages.length, 'pages')
+
         // Build hierarchical tree
+        console.log('🌳 Building content tree...')
         contentTree = buildContentTree(pages)
+        console.log('🌳 Content tree built with', contentTree.length, 'root pages')
 
         // Cache for 60 seconds
+        console.log('💾 Caching result for 60 seconds...')
         await cache.set(cacheKey, contentTree, 60)
+        console.log('💾 Cache set successfully')
       } catch (dbError) {
-        console.error('Database query failed, using mock data:', dbError)
+        console.error('❌ Database query failed, using mock data:', dbError)
 
         // Return mock data for resilience
         contentTree = [
@@ -71,14 +93,19 @@ export async function GET(request: NextRequest) {
         ]
 
         // Cache mock data for 30 seconds
+        console.log('💾 Caching mock data for 30 seconds...')
         await cache.set(cacheKey, contentTree, 30)
+        console.log('💾 Mock data cached successfully')
       }
     }
 
+    console.log('✅ Content tree ready, returning response')
+
+    console.log('📤 Returning response with', contentTree.length, 'root pages')
     return NextResponse.json({ tree: contentTree })
 
   } catch (error) {
-    console.error('Content tree fetch error:', error)
+    console.error('❌ Content tree fetch error:', error)
 
     // More detailed error logging
     if (error instanceof Error) {

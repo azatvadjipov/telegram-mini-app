@@ -4,13 +4,22 @@ let redis: any = null
 
 if (env.REDIS_URL) {
   try {
+    console.log('🔄 Initializing Redis cache...')
     // Dynamic import for Redis to make it optional
     const { createClient } = require('redis')
     redis = createClient({ url: env.REDIS_URL })
-    redis.connect().catch(console.error)
+    redis.connect().then(() => {
+      console.log('✅ Redis connected successfully')
+    }).catch((error: any) => {
+      console.error('❌ Redis connection failed:', error)
+      redis = null
+    })
   } catch (error) {
-    console.warn('Redis not available, caching disabled')
+    console.warn('⚠️ Redis not available, caching disabled')
+    redis = null
   }
+} else {
+  console.log('ℹ️ No REDIS_URL provided, caching disabled')
 }
 
 export class Cache {
@@ -29,24 +38,34 @@ export class Cache {
   }
 
   async get<T>(key: string): Promise<T | null> {
-    if (!this.client) return null
+    if (!this.client) {
+      console.log('💾 Cache disabled, returning null for key:', key)
+      return null
+    }
 
     try {
+      console.log('💾 Cache get:', key)
       const value = await this.client.get(key)
+      console.log('💾 Cache get result:', value ? 'found' : 'not found')
       return value ? JSON.parse(value) : null
     } catch (error) {
-      console.error('Cache get error:', error)
+      console.error('❌ Cache get error:', error)
       return null
     }
   }
 
   async set(key: string, value: any, ttlSeconds: number = 60): Promise<void> {
-    if (!this.client) return
+    if (!this.client) {
+      console.log('💾 Cache disabled, skipping set for key:', key)
+      return
+    }
 
     try {
+      console.log('💾 Cache set:', key, 'TTL:', ttlSeconds)
       await this.client.setEx(key, ttlSeconds, JSON.stringify(value))
+      console.log('💾 Cache set completed')
     } catch (error) {
-      console.error('Cache set error:', error)
+      console.error('❌ Cache set error:', error)
     }
   }
 
