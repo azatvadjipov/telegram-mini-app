@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     const cacheKey = 'content:tree'
     console.log('💾 Checking cache for key:', cacheKey)
 
-    let contentTree = await cache.get(cacheKey)
+    let contentTree: any[] = await cache.get(cacheKey)
     console.log('💾 Cache result:', contentTree ? 'HIT' : 'MISS')
 
     if (!contentTree) {
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         // Build hierarchical tree
         console.log('🌳 Building content tree...')
         contentTree = buildContentTree(pages)
-        console.log('🌳 Content tree built with', contentTree.length, 'root pages')
+        console.log('🌳 Content tree built with', (contentTree as any[]).length, 'root pages')
 
         // Cache for 60 seconds
         console.log('💾 Caching result for 60 seconds...')
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Content tree ready, returning response')
 
-    console.log('📤 Returning response with', contentTree.length, 'root pages')
+    console.log('📤 Returning response with', (contentTree as any[]).length, 'root pages')
     return NextResponse.json({ tree: contentTree })
 
   } catch (error) {
