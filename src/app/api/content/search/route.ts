@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageStatus, PageAccess } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
 import { verifyJWT } from '@/lib/jwt'
 
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       // Search in pages
       const pages = await prisma.page.findMany({
         where: {
-          status: 'published',
+          status: PageStatus.published,
           OR: [
             {
               title: {
@@ -60,8 +60,8 @@ export async function GET(request: NextRequest) {
           // Filter by access level
           ...(isSubscribed ? {} : {
             OR: [
-              { access: 'public' },
-              { access: 'premium' } // Will be filtered client-side
+              { access: PageAccess.public },
+              { access: PageAccess.premium } // Will be filtered client-side
             ]
           })
         },

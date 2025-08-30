@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageStatus } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
 import { verifyJWT } from '@/lib/jwt'
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       // Fetch from database
       const pages = await prisma.page.findMany({
         where: {
-          status: 'published',
+          status: PageStatus.published,
         },
         select: {
           id: true,

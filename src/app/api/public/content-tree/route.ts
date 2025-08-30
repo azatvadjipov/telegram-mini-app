@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageStatus, PageAccess } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
 
 export async function GET() {
@@ -16,8 +16,8 @@ export async function GET() {
       // Fetch only public pages from database
       const pages = await prisma.page.findMany({
         where: {
-          status: 'published',
-          access: 'public',
+          status: PageStatus.published,
+          access: PageAccess.public,
         },
         select: {
           id: true,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageAccess } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
 import { verifyJWT } from '@/lib/jwt'
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check access permissions
-    if ((page as any).access === 'premium') {
+    if ((page as any).access === PageAccess.premium) {
       if (!authHeader?.startsWith('Bearer ')) {
         return NextResponse.json(
           { error: 'Требуется авторизация для доступа к премиум контенту' },
