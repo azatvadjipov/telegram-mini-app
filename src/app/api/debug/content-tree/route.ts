@@ -6,8 +6,8 @@ export async function GET() {
     console.log('🔍 Debug: Testing database connection...')
 
     // Test database connection
-    const testConnection = await prisma.$queryRaw`SELECT 1 as test`
-    console.log('✅ Database connection successful:', testConnection)
+    const testCount = await prisma.page.count()
+    console.log('✅ Database connection successful: Found', testCount, 'pages')
 
     // Test page count
     const pageCount = await prisma.page.count()

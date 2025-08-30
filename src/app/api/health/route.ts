@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     // Check database connection
-    await prisma.$queryRaw`SELECT 1`
+    await prisma.page.count()
 
     return NextResponse.json({
       status: 'healthy',

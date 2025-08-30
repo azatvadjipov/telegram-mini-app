@@ -87,6 +87,16 @@
             <div id="protected-results"></div>
         </div>
 
+        <div class="section warning">
+            <h2>⚙️ Админ функции</h2>
+            <p><strong>Внимание:</strong> Используйте только если понимаете что делаете!</p>
+            <br>
+            <button onclick="runDatabaseMigration()" style="background: #ff6b35;">🗄️ Запустить миграции БД</button>
+            <button onclick="seedDatabase()">🌱 Заполнить тестовыми данными</button>
+
+            <div id="admin-results"></div>
+        </div>
+
         <div class="section">
             <h2>📋 Результаты тестирования</h2>
             <div id="results"></div>
@@ -184,6 +194,25 @@
             });
 
             displayResult('results', result, '🔐 Защищенное дерево контента');
+        }
+
+        // Admin functions
+        async function runDatabaseMigration() {
+            if (!confirm('Вы уверены что хотите запустить миграции базы данных? Это может изменить структуру данных.')) {
+                return;
+            }
+
+            const result = await makeRequest('/api/admin/migrate', { method: 'POST' });
+            displayResult('admin-results', result, '🗄️ Миграции базы данных');
+        }
+
+        async function seedDatabase() {
+            if (!confirm('Вы уверены что хотите заполнить базу данных тестовыми данными? Это добавит тестовые записи.')) {
+                return;
+            }
+
+            const result = await makeRequest('/api/admin/seed', { method: 'POST' });
+            displayResult('admin-results', result, '🌱 Сидирование базы данных');
         }
 
         // Auto-run basic tests on page load

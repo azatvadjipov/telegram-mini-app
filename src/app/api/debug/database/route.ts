@@ -5,12 +5,11 @@ export async function GET() {
   try {
     console.log('🔍 Debug: Testing database connection...')
 
-    // Test basic connection
-    const testResult = await prisma.$queryRaw`SELECT 1 as connection_test, NOW() as current_time`
-    console.log('✅ Database connection test:', testResult)
-
-    // Count all records
+    // Test basic connection - используем простой count вместо raw query
     const pageCount = await prisma.page.count()
+    console.log('✅ Database connection test: Found', pageCount, 'pages')
+
+    // Count all records (уже посчитали pages выше)
     const userAccessCount = await prisma.userAccess.count()
     const settingCount = await prisma.setting.count()
 
