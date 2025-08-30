@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma, PageStatus, PageAccess } from '@/lib/prisma'
 
 export async function POST() {
   try {
@@ -47,8 +47,8 @@ export async function POST() {
 ---
 
 *Приятного использования! 🚀*`,
-        status: 'published',
-        access: 'public',
+        status: PageStatus.published,
+        access: PageAccess.public,
         sort: 0,
       },
       {
@@ -73,8 +73,8 @@ export async function POST() {
 ---
 
 *Спасибо за поддержку! 💝*`,
-        status: 'published',
-        access: 'premium',
+        status: PageStatus.published,
+        access: PageAccess.premium,
         sort: 1,
       },
     ]
