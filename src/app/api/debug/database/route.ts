@@ -29,7 +29,7 @@ export async function GET() {
         slug: true,
         status: true,
         access: true,
-        createdAt: true
+        updatedAt: true
       }
     })
 
