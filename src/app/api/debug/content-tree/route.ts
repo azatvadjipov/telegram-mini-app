@@ -5,33 +5,27 @@ export async function GET() {
   try {
     console.log('🔍 Debug: Testing database connection...')
 
-    // Test database connection - use findFirst instead of count
-    const testPage = await prisma.page.findFirst({
-      select: { id: true }
-    })
-    console.log('✅ Database connection successful:', testPage ? 'Found pages' : 'No pages found')
+    // Test database connection using raw SQL
+    const testResult = await prisma.$queryRaw`
+      SELECT COUNT(*) as count FROM "Page"
+    ` as any[]
 
-    // Fetch pages without auth
-    const pages = await prisma.page.findMany({
-      where: {
-        status: PageStatus.published,
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-        access: true,
-      },
-      take: 5, // Limit for debugging
-    })
+    console.log('✅ Database connection successful: Found', testResult[0]?.count || 0, 'pages')
+
+    // Fetch pages without auth using raw SQL
+    const pages = await prisma.$queryRaw`
+      SELECT id, title, slug, status, access
+      FROM "Page"
+      WHERE status = 'published'
+      LIMIT 5
+    ` as any[]
 
     console.log('📋 Sample pages:', pages)
 
     return NextResponse.json({
       success: true,
       databaseConnected: true,
-      pageCount: pages.length,
+      pageCount: parseInt(testResult[0]?.count || '0'),
       samplePages: pages,
       timestamp: new Date().toISOString()
     })

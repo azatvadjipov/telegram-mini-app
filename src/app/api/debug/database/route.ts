@@ -5,47 +5,32 @@ export async function GET() {
   try {
     console.log('🔍 Debug: Testing database connection...')
 
-    // Simple connection test - try to find one page
-    const testPage = await prisma.page.findFirst({
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-        access: true,
-        updatedAt: true
-      }
-    })
+    // Use raw SQL to avoid prepared statement conflicts
+    const testResult = await prisma.$queryRaw`
+      SELECT COUNT(*) as count FROM "Page" LIMIT 1
+    ` as any[]
 
-    console.log('✅ Database connection test: Found page:', testPage?.title || 'No pages found')
+    console.log('✅ Database connection test: Found', testResult[0]?.count || 0, 'pages')
 
-    // Get sample data (limit to avoid prepared statement issues)
-    const samplePages = await prisma.page.findMany({
-      take: 2,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-        access: true,
-        updatedAt: true
-      }
-    })
+    // Get sample data using raw SQL
+    const samplePages = await prisma.$queryRaw`
+      SELECT id, title, slug, status, access, "updatedAt"
+      FROM "Page"
+      LIMIT 2
+    ` as any[]
 
-    const sampleSettings = await prisma.setting.findMany({
-      take: 3,
-      select: {
-        key: true,
-        value: true
-      }
-    })
+    const sampleSettings = await prisma.$queryRaw`
+      SELECT key, value
+      FROM "Setting"
+      LIMIT 3
+    ` as any[]
 
     return NextResponse.json({
       success: true,
       database: {
         connected: true,
         counts: {
-          pages: samplePages.length,
+          pages: parseInt(testResult[0]?.count || '0'),
           userAccess: 1, // Assume at least one user exists
           settings: sampleSettings.length
         },

@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Check database connection - use simple query instead of count
-    await prisma.page.findFirst({
-      select: { id: true }
-    })
+    // Check database connection using raw SQL
+    await prisma.$queryRaw`
+      SELECT 1 FROM "Page" LIMIT 1
+    `
 
     return NextResponse.json({
       status: 'healthy',
