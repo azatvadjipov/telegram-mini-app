@@ -47,12 +47,7 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
           return
         }
 
-        if (response.status === 403) {
-          // Show upsell page instead of error message
-          setShowUpsell(true)
-          setIsLoading(false)
-          return
-        }
+
 
         if (!response.ok) {
           throw new Error(messages.errors.serverError)
@@ -60,6 +55,14 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
 
         const data = await response.json()
         setPage(data.page)
+
+        // Check if this is premium content and user doesn't have access
+        // In development mode, we always have access to premium content
+        if (data.page.access === 'premium' && !sessionJWT && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+          setShowUpsell(true)
+          setIsLoading(false)
+          return
+        }
       } catch (err) {
         console.error('Error fetching page:', err)
         setError(err instanceof Error ? err.message : messages.errors.unknownError)
