@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react'
 import { LoadingSpinner } from './LoadingSpinner'
 import { messages } from '@/lib/messages'
-import { env } from '@/lib/env'
 
 export function UpsellView() {
   const [isLoading, setIsLoading] = useState(true)
   const [iframeError, setIframeError] = useState(false)
 
-  // Use the configured upsell URL
-  const upsellUrl = env.TILDA_UPSELL_URL
+  // Use the configured upsell URL from NEXT_PUBLIC env var
+  const upsellUrl = process.env.NEXT_PUBLIC_TILDA_UPSELL_URL || 'https://example.com/upsell'
 
   useEffect(() => {
     const timer = setTimeout(() => {

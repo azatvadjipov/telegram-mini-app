@@ -1,3 +1,4 @@
+import 'server-only'
 import { createHmac } from 'crypto'
 import { env } from './env'
 

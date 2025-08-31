@@ -1,3 +1,4 @@
+import 'server-only'
 import { env } from './env'
 
 let redis: any = null

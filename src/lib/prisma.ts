@@ -1,3 +1,4 @@
+import 'server-only'
 import { PrismaClient, PageStatus, PageAccess } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
