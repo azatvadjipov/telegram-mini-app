@@ -183,23 +183,7 @@ export function ContentSidebar({ contentTree, selectedSlug, onSelectSlug, user, 
   }
 
   return (
-    <div className="w-80 bg-card border-r border-border flex flex-col">
-      {/* User info header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
-            {user.first_name[0].toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-medium truncate">{user.first_name}</div>
-            {user.username && (
-              <div className="text-xs text-muted-foreground truncate">
-                @{user.username}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="w-80 bg-card border-r border-border flex flex-col h-full">
 
       {/* Search */}
       <div className="p-4 border-b border-border">

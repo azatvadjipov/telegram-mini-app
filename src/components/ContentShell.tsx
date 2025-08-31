@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ContentSidebar } from './ContentSidebar'
 import { ContentViewer } from './ContentViewer'
 import { LoadingSpinner } from './LoadingSpinner'
 import { messages } from '@/lib/messages'
+import { MobileLayout } from './MobileLayout'
 
 interface User {
   id: number
@@ -84,20 +84,11 @@ export function ContentShell({ sessionJWT, user }: ContentShellProps) {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <ContentSidebar
-        contentTree={contentTree}
-        selectedSlug={selectedSlug}
-        onSelectSlug={setSelectedSlug}
-        user={user}
-        sessionJWT={sessionJWT}
-      />
-      <div className="flex-1 overflow-hidden">
-        <ContentViewer
-          slug={selectedSlug}
-          sessionJWT={sessionJWT}
-        />
-      </div>
-    </div>
+    <MobileLayout
+      contentTree={contentTree}
+      selectedSlug={selectedSlug}
+      onSelectSlug={setSelectedSlug}
+      sessionJWT={sessionJWT}
+    />
   )
 }

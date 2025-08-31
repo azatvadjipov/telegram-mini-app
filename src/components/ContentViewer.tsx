@@ -6,6 +6,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import rehypePrism from 'rehype-prism-plus'
 import { LoadingSpinner } from './LoadingSpinner'
+import { UpsellView } from './UpsellView'
 import { messages } from '@/lib/messages'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +28,7 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
   const [page, setPage] = useState<PageData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showUpsell, setShowUpsell] = useState(false)
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -46,7 +48,9 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
         }
 
         if (response.status === 403) {
-          setError(messages.content.accessDenied)
+          // Show upsell page instead of error message
+          setShowUpsell(true)
+          setIsLoading(false)
           return
         }
 
@@ -76,6 +80,10 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
         <span className="ml-2">{messages.content.loading}</span>
       </div>
     )
+  }
+
+  if (showUpsell) {
+    return <UpsellView />
   }
 
   if (error) {
