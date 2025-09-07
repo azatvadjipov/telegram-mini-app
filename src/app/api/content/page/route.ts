@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     let page: any = await cache.get(cacheKey)
 
     // Ensure page is properly typed
-    if (page && typeof page !== 'object') {
+    if (page !== null && page !== undefined && typeof page !== 'object') {
       console.log('📄 Invalid cached page data, treating as not cached')
       page = null
     }

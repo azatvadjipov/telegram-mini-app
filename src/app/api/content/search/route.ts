@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `search:${query}:${isSubscribed}:${limit}`
-    let searchResults: any[] = await cache.get(cacheKey)
+    let searchResults: any[] | null = await cache.get(cacheKey)
 
     if (!searchResults) {
       const searchQuery = query.trim().toLowerCase()
