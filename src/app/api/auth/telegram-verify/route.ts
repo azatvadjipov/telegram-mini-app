@@ -36,9 +36,11 @@ export async function POST(request: NextRequest) {
 
     // Check cache first for subscription status
     const cacheKey = `subscription:${telegramUserId}`
-    let isSubscribed = await cache.get(cacheKey)
+    let isSubscribed: boolean
 
-    if (isSubscribed === null) {
+    const cachedSubscription = await cache.get(cacheKey)
+
+    if (cachedSubscription === null) {
       console.log('📡 Checking subscription with Tribute...')
 
       // Check subscription status with Tribute
@@ -50,6 +52,7 @@ export async function POST(request: NextRequest) {
       console.log('💾 Subscription status cached')
     } else {
       console.log('✅ Using cached subscription status')
+      isSubscribed = cachedSubscription as boolean
     }
 
     console.log('🎯 User subscription status:', isSubscribed)

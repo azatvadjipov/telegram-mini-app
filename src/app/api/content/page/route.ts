@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `page:${slug}:${isSubscribed}`
-    let page = await cache.get(cacheKey)
+    let page: any = await cache.get(cacheKey)
 
     if (!page) {
       console.log('📡 Fetching page from database...')
