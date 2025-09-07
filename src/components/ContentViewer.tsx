@@ -47,7 +47,12 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
           return
         }
 
-
+        if (response.status === 403) {
+          // User doesn't have access to premium content
+          setShowUpsell(true)
+          setIsLoading(false)
+          return
+        }
 
         if (!response.ok) {
           throw new Error(messages.errors.serverError)
@@ -57,11 +62,12 @@ export function ContentViewer({ slug, sessionJWT }: ContentViewerProps) {
         setPage(data.page)
 
         // Check if this is premium content and user doesn't have access
-        // In development mode, we always have access to premium content
-        if (data.page.access === 'premium' && !sessionJWT && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
-          setShowUpsell(true)
-          setIsLoading(false)
-          return
+        // For premium content, we need to check subscription status via API
+        if (data.page.access === 'premium') {
+          // We need to verify subscription status - this should be handled by the API
+          // If API returned premium content, user has access
+          // If API returned 403, user doesn't have access and should see upsell
+          console.log('🎯 Premium content loaded successfully')
         }
       } catch (err) {
         console.error('Error fetching page:', err)

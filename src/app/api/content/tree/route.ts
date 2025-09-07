@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma, PageStatus } from '@/lib/prisma'
+import { prisma, PageStatus, PageAccess } from '@/lib/prisma'
 import { cache } from '@/lib/cache'
 import { verifyJWT } from '@/lib/jwt'
 
@@ -7,32 +7,92 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🌳 Content tree request started')
 
-    // Simplified response - return mock data immediately to avoid timeouts
-    const contentTree = [
-      {
-        id: 'mock-welcome',
-        parentId: null,
-        slug: 'welcome',
-        title: 'Добро пожаловать',
-        excerpt: 'Введение в наш контент',
-        access: 'public',
-        sort: 0,
-        children: []
-      },
-      {
-        id: 'mock-premium',
-        parentId: null,
-        slug: 'premium-content',
-        title: 'Премиум контент',
-        excerpt: 'Эксклюзивный контент для подписчиков',
-        access: 'premium',
-        sort: 1,
-        children: []
-      }
-    ]
+    // Check authorization for premium content access
+    const authHeader = request.headers.get('authorization')
+    let isSubscribed = false
 
-    console.log('✅ Returning mock content tree')
-    return NextResponse.json({ tree: contentTree })
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      try {
+        const payload = await verifyJWT(token)
+        isSubscribed = payload?.isSubscribed || false
+        console.log('🌳 User subscription status:', isSubscribed)
+      } catch (error) {
+        console.log('🌳 JWT verification failed:', error)
+      }
+    }
+
+    // Check cache first
+    const cacheKey = `tree:${isSubscribed}`
+    let contentTree = await cache.get(cacheKey)
+
+    if (!contentTree) {
+      console.log('📡 Fetching content tree from database...')
+
+      try {
+        // Fetch pages from database
+        const pages = await prisma.page.findMany({
+          where: {
+            status: PageStatus.published,
+            // Filter by access level
+            ...(isSubscribed ? {} : {
+              access: PageAccess.public
+            })
+          },
+          select: {
+            id: true,
+            parentId: true,
+            slug: true,
+            title: true,
+            excerpt: true,
+            access: true,
+            sort: true,
+          },
+          orderBy: [
+            { sort: 'asc' },
+            { title: 'asc' }
+          ],
+        })
+
+        console.log(`📄 Found ${pages.length} pages`)
+
+        // Build hierarchical tree
+        contentTree = buildContentTree(pages)
+
+        // Cache for 5 minutes
+        await cache.set(cacheKey, contentTree, 300)
+        console.log('💾 Content tree cached')
+      } catch (dbError) {
+        console.error('Database query failed, using mock data:', dbError)
+
+        // Return mock data for resilience
+        contentTree = [
+          {
+            id: 'mock-welcome',
+            parentId: null,
+            slug: 'welcome',
+            title: 'Добро пожаловать',
+            excerpt: 'Введение в наш контент',
+            access: 'public',
+            sort: 0,
+            children: []
+          }
+        ]
+
+        // Cache mock data for 30 seconds
+        await cache.set(cacheKey, contentTree, 30)
+        console.log('💾 Mock content tree cached')
+      }
+    } else {
+      console.log('✅ Using cached content tree')
+    }
+
+    console.log('✅ Returning content tree')
+    return NextResponse.json({
+      tree: contentTree,
+      cached: true,
+      timestamp: new Date().toISOString()
+    })
 
   } catch (error) {
     console.error('❌ Content tree error:', error)

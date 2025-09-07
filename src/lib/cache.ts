@@ -1,4 +1,4 @@
-import 'server-only'
+// import 'server-only' // Commented out for CLI compatibility
 import { env } from './env'
 
 let redis: any = null

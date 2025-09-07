@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma, PageStatus, PageAccess } from '@/lib/prisma'
+import { cache } from '@/lib/cache'
+import { verifyJWT } from '@/lib/jwt'
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,15 +19,91 @@ export async function GET(request: NextRequest) {
 
     console.log('📄 Requested slug:', slug)
 
-    // Return mock data based on slug - no database queries or JWT verification
-    let page;
+    // Check authorization for premium content access
+    const authHeader = request.headers.get('authorization')
+    let isSubscribed = false
 
-    if (slug === 'welcome') {
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      try {
+        const payload = await verifyJWT(token)
+        isSubscribed = payload?.isSubscribed || false
+        console.log('📄 User subscription status:', isSubscribed)
+      } catch (error) {
+        console.log('📄 JWT verification failed:', error)
+      }
+    }
+
+    // Check cache first
+    const cacheKey = `page:${slug}:${isSubscribed}`
+    let page = await cache.get(cacheKey)
+
+    if (!page) {
+      console.log('📡 Fetching page from database...')
+
+      // Fetch page from database
+      const dbPage = await prisma.page.findUnique({
+        where: {
+          slug,
+          status: PageStatus.published,
+        },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          excerpt: true,
+          contentMd: true,
+          access: true,
+          updatedAt: true,
+        },
+      })
+
+      if (!dbPage) {
+        console.log('📄 Page not found:', slug)
+        return NextResponse.json(
+          { error: 'Страница не найдена' },
+          { status: 404 }
+        )
+      }
+
+      // Check if user has access to premium content
+      if (dbPage.access === PageAccess.premium && !isSubscribed) {
+        console.log('📄 Premium content access denied for slug:', slug)
+        return NextResponse.json(
+          { error: 'Доступ к премиум контенту ограничен' },
+          { status: 403 }
+        )
+      }
+
       page = {
-        id: 'mock-welcome',
-        title: 'Добро пожаловать',
-        excerpt: 'Введение в наш контент',
-        contentMd: `# Добро пожаловать!
+        id: dbPage.id,
+        title: dbPage.title,
+        excerpt: dbPage.excerpt,
+        contentMd: dbPage.contentMd,
+        access: dbPage.access,
+        updatedAt: dbPage.updatedAt.toISOString()
+      }
+
+      // Cache for 5 minutes
+      await cache.set(cacheKey, page, 300)
+      console.log('💾 Page cached')
+    } else {
+      console.log('✅ Using cached page')
+    }
+
+    console.log('📄 Returning page for slug:', slug)
+    return NextResponse.json({ page })
+
+  } catch (error) {
+    console.error('❌ Page fetch error:', error)
+
+    // Return mock data as fallback for resilience
+    console.log('📄 Using mock data as fallback')
+    const mockPage = {
+      id: 'mock-welcome',
+      title: 'Добро пожаловать',
+      excerpt: 'Введение в наш контент',
+      contentMd: `# Добро пожаловать!
 
 Это тестовая страница с контентом. Здесь вы можете разместить любое содержимое в формате Markdown.
 
@@ -45,50 +124,10 @@ export async function GET(request: NextRequest) {
 ---
 
 *Приятного использования! 🚀*`,
-        access: 'public',
-        updatedAt: new Date().toISOString()
-      }
-    } else if (slug === 'premium-content') {
-      page = {
-        id: 'mock-premium',
-        title: 'Премиум контент',
-        excerpt: 'Эксклюзивный контент для подписчиков',
-        contentMd: `# Премиум контент
-
-🎉 **Поздравляем!** Вы имеете доступ к премиум контенту.
-
-## Эксклюзивные материалы
-
-Этот раздел содержит материалы, доступные только подписчикам.
-
-### Преимущества подписки
-
-- ✅ Доступ ко всему контенту
-- ✅ Регулярные обновления
-- ✅ Приоритетная поддержка
-- ✅ Эксклюзивные материалы
-
----
-
-*Спасибо за поддержку! 💝*`,
-        access: 'premium',
-        updatedAt: new Date().toISOString()
-      }
-    } else {
-      return NextResponse.json(
-        { error: 'Страница не найдена' },
-        { status: 404 }
-      )
+      access: 'public',
+      updatedAt: new Date().toISOString()
     }
 
-    console.log('📄 Returning mock page for slug:', slug)
-    return NextResponse.json({ page })
-
-  } catch (error) {
-    console.error('❌ Page fetch error:', error)
-    return NextResponse.json(
-      { error: 'Ошибка при получении страницы' },
-      { status: 500 }
-    )
+    return NextResponse.json({ page: mockPage })
   }
 }

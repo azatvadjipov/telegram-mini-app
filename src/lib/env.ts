@@ -1,4 +1,4 @@
-import 'server-only'
+// import 'server-only' // Commented out for CLI compatibility
 import { z } from 'zod'
 
 const envSchema = z.object({
