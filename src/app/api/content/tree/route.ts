@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `tree:${isSubscribed}`
-    let contentTree: any = await cache.get(cacheKey)
+    let contentTree: any[] = await cache.get(cacheKey)
 
     if (!contentTree) {
       console.log('📡 Fetching content tree from database...')

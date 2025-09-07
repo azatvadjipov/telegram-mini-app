@@ -38,6 +38,12 @@ export async function GET(request: NextRequest) {
     const cacheKey = `page:${slug}:${isSubscribed}`
     let page: any = await cache.get(cacheKey)
 
+    // Ensure page is properly typed
+    if (page && typeof page !== 'object') {
+      console.log('📄 Invalid cached page data, treating as not cached')
+      page = null
+    }
+
     if (!page) {
       console.log('📡 Fetching page from database...')
 

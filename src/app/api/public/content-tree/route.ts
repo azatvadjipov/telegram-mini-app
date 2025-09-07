@@ -8,7 +8,7 @@ export async function GET() {
 
     // Check cache first
     const cacheKey = 'public:content:tree'
-    let contentTree: any = await cache.get(cacheKey)
+    let contentTree: any[] = await cache.get(cacheKey)
 
     if (!contentTree) {
       console.log('📡 Fetching from database...')
