@@ -28,7 +28,13 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `search:${query}:${isSubscribed}:${limit}`
-    let searchResults: any[] | null = await cache.get(cacheKey)
+    let searchResults: any[] | null = null
+
+    try {
+      searchResults = await cache.get(cacheKey)
+    } catch (cacheError) {
+      console.log('⚠️ Cache unavailable, performing search...')
+    }
 
     if (!searchResults) {
       const searchQuery = query.trim().toLowerCase()
@@ -129,8 +135,13 @@ export async function GET(request: NextRequest) {
         })
         .slice(0, limit)
 
-      // Cache for 5 minutes
-      await cache.set(cacheKey, searchResults, 300)
+      // Try to cache for 5 minutes (but don't fail if Redis is unavailable)
+      try {
+        await cache.set(cacheKey, searchResults, 300)
+        console.log('💾 Search results cached')
+      } catch (cacheError) {
+        console.log('⚠️ Cache unavailable, proceeding without caching search results')
+      }
     }
 
     return NextResponse.json({

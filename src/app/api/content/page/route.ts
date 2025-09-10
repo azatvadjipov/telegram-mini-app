@@ -36,12 +36,17 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `page:${slug}:${isSubscribed}`
-    let page: any = await cache.get(cacheKey)
+    let page: any = null
 
-    // Ensure page is properly typed
-    if (page !== null && page !== undefined && typeof page !== 'object') {
-      console.log('📄 Invalid cached page data, treating as not cached')
-      page = null
+    try {
+      page = await cache.get(cacheKey)
+      // Ensure page is properly typed
+      if (page !== null && page !== undefined && typeof page !== 'object') {
+        console.log('📄 Invalid cached page data, treating as not cached')
+        page = null
+      }
+    } catch (cacheError) {
+      console.log('⚠️ Cache unavailable, fetching from database...')
     }
 
     if (!page) {
@@ -90,9 +95,13 @@ export async function GET(request: NextRequest) {
         updatedAt: dbPage.updatedAt.toISOString()
       }
 
-      // Cache for 5 minutes
-      await cache.set(cacheKey, page, 300)
-      console.log('💾 Page cached')
+      // Try to cache for 5 minutes (but don't fail if Redis is unavailable)
+      try {
+        await cache.set(cacheKey, page, 300)
+        console.log('💾 Page cached')
+      } catch (cacheError) {
+        console.log('⚠️ Cache unavailable, proceeding without caching page')
+      }
     } else {
       console.log('✅ Using cached page')
     }

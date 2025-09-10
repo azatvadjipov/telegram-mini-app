@@ -38,21 +38,32 @@ export async function POST(request: NextRequest) {
     const cacheKey = `subscription:${telegramUserId}`
     let isSubscribed: boolean
 
-    const cachedSubscription = await cache.get<boolean>(cacheKey)
+    try {
+      const cachedSubscription = await cache.get<boolean>(cacheKey)
 
-    if (cachedSubscription === null || cachedSubscription === undefined) {
-      console.log('📡 Checking subscription with Tribute...')
+      if (cachedSubscription === null || cachedSubscription === undefined) {
+        console.log('📡 Checking subscription with Tribute...')
 
-      // Check subscription status with Tribute
+        // Check subscription status with Tribute
+        const subscription = await tributeClient.checkSubscription(telegramUserId)
+        isSubscribed = subscription.isActive
+
+        // Try to cache subscription status for 5 minutes (but don't fail if Redis is unavailable)
+        try {
+          await cache.set(cacheKey, isSubscribed, 300)
+          console.log('💾 Subscription status cached')
+        } catch (cacheError) {
+          console.log('⚠️ Cache unavailable, proceeding without caching')
+        }
+      } else {
+        console.log('✅ Using cached subscription status')
+        isSubscribed = cachedSubscription
+      }
+    } catch (cacheError) {
+      console.log('⚠️ Cache unavailable, checking subscription directly...')
+      // Fallback: check subscription directly without cache
       const subscription = await tributeClient.checkSubscription(telegramUserId)
       isSubscribed = subscription.isActive
-
-      // Cache subscription status for 5 minutes
-      await cache.set(cacheKey, isSubscribed, 300)
-      console.log('💾 Subscription status cached')
-    } else {
-      console.log('✅ Using cached subscription status')
-      isSubscribed = cachedSubscription
     }
 
     console.log('🎯 User subscription status:', isSubscribed)

@@ -8,13 +8,28 @@ if (env.REDIS_URL) {
     console.log('🔄 Initializing Redis cache...')
     // Dynamic import for Redis to make it optional
     const { createClient } = require('redis')
-    redis = createClient({ url: env.REDIS_URL })
-    redis.connect().then(() => {
-      console.log('✅ Redis connected successfully')
-    }).catch((error: any) => {
-      console.error('❌ Redis connection failed:', error)
-      redis = null
+    redis = createClient({
+      url: env.REDIS_URL,
+      socket: {
+        connectTimeout: 5000, // 5 second timeout
+        lazyConnect: true, // Don't auto-connect
+      }
     })
+
+    // Try to connect with timeout
+    const connectPromise = redis.connect()
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Redis connection timeout')), 5000)
+    })
+
+    Promise.race([connectPromise, timeoutPromise])
+      .then(() => {
+        console.log('✅ Redis connected successfully')
+      })
+      .catch((error: any) => {
+        console.error('❌ Redis connection failed:', error.message)
+        redis = null
+      })
   } catch (error) {
     console.warn('⚠️ Redis not available, caching disabled')
     redis = null

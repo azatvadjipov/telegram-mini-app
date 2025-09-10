@@ -24,7 +24,13 @@ export async function GET(request: NextRequest) {
 
     // Check cache first
     const cacheKey = `tree:${isSubscribed}`
-    let contentTree: any[] | null = await cache.get(cacheKey)
+    let contentTree: any[] | null = null
+
+    try {
+      contentTree = await cache.get(cacheKey)
+    } catch (cacheError) {
+      console.log('⚠️ Cache unavailable, fetching from database...')
+    }
 
     if (!contentTree) {
       console.log('📡 Fetching content tree from database...')
@@ -59,9 +65,13 @@ export async function GET(request: NextRequest) {
         // Build hierarchical tree
         contentTree = buildContentTree(pages)
 
-        // Cache for 5 minutes
-        await cache.set(cacheKey, contentTree, 300)
-        console.log('💾 Content tree cached')
+        // Try to cache for 5 minutes (but don't fail if Redis is unavailable)
+        try {
+          await cache.set(cacheKey, contentTree, 300)
+          console.log('💾 Content tree cached')
+        } catch (cacheError) {
+          console.log('⚠️ Cache unavailable, proceeding without caching')
+        }
       } catch (dbError) {
         console.error('Database query failed, using mock data:', dbError)
 
@@ -79,9 +89,13 @@ export async function GET(request: NextRequest) {
           }
         ]
 
-        // Cache mock data for 30 seconds
-        await cache.set(cacheKey, contentTree, 30)
-        console.log('💾 Mock content tree cached')
+        // Try to cache mock data for 30 seconds (but don't fail if Redis is unavailable)
+        try {
+          await cache.set(cacheKey, contentTree, 30)
+          console.log('💾 Mock content tree cached')
+        } catch (cacheError) {
+          console.log('⚠️ Cache unavailable, proceeding without caching mock data')
+        }
       }
     } else {
       console.log('✅ Using cached content tree')
